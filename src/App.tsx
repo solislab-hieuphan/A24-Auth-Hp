@@ -6,11 +6,14 @@ import auth0 from 'auth0-js';
 const domain = process.env.REACT_APP_AUTH0_DOMAIN || "";
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID || "";
 
+const responseType = 'token id_token';
+const scope = 'openid profile email';
+
 const webAuth = new auth0.WebAuth({
   domain: domain,
   clientID: clientId,
-  responseType: 'token id_token',
-  scope: 'openid profile email'
+  responseType: responseType,
+  scope: scope
 });
 
 function App() {
@@ -32,7 +35,7 @@ function App() {
           setCustomUser(authResult.idTokenPayload);
           window.history.replaceState(null, "", window.location.pathname);
         } else if (err) {
-          console.error("Lỗi parse hash:", err);
+          console.error("Error parsing hash:", err);
         }
       });
     }
@@ -59,7 +62,7 @@ function App() {
   const handleCustomSignup = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
+      alert("Passwords do not match!");
       return;
     }
     setIsSubmitting(true);
@@ -75,10 +78,10 @@ function App() {
     }, function (err) {
       setIsSubmitting(false);
       if (err) {
-        alert("Lỗi đăng ký: " + err.description);
+        alert("Error: " + err.description);
         return;
       }
-      alert("Đăng ký thành công! Hãy kiểm tra email để xác nhận.");
+      alert("Registration successful! Please check your email to verify.");
       setView('custom-signin');
     });
   };
@@ -92,12 +95,12 @@ function App() {
       email: formData.email,
       password: formData.password,
       redirectUri: window.location.origin,
-      responseType: 'token id_token',
-      scope: 'openid profile email'
+      responseType: responseType,
+      scope: scope
     } as any, function (err: any) {
       setIsSubmitting(false);
       if (err) {
-        alert("Lỗi đăng nhập: " + err.description);
+        alert("Error: " + err.description);
         return;
       }
     });
@@ -106,7 +109,7 @@ function App() {
   const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email) {
-      alert("Vui lòng nhập email!");
+      alert("Please enter your email!");
       return;
     }
     setIsSubmitting(true);
@@ -116,10 +119,10 @@ function App() {
     }, function (err, resp) {
       setIsSubmitting(false);
       if (err) {
-        alert("Lỗi: " + err.description);
+        alert("Error: " + err.description);
         return;
       }
-      alert("Một email hướng dẫn reset mật khẩu đã được gửi đến: " + formData.email);
+      alert("A password reset email has been sent to: " + formData.email);
       setView('custom-signin');
     });
   };
@@ -271,13 +274,10 @@ function App() {
       <p className="subtitle">Advanced Press API Access</p>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {/* Nút 1: Custom Sign In */}
         <button className="btn" onClick={() => setView('custom-signin')}>
           <LogIn size={20} />
           Custom Sign In
         </button>
-
-        {/* Nút 2: Sign In qua Auth0 Hosted App */}
         <button 
           className="btn btn-secondary" 
           onClick={() => loginWithRedirect()}
