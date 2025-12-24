@@ -6,12 +6,17 @@ import auth0 from 'auth0-js';
 const domain = process.env.REACT_APP_AUTH0_DOMAIN || "";
 const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID || "";
 
+const responseType = 'token id_token';
+const scope = 'openid profile email';
+
 const webAuth = new auth0.WebAuth({
   domain: domain,
   clientID: clientId,
-  responseType: 'token id_token',
-  scope: 'openid profile email'
+  responseType: responseType,
+  scope: scope
 });
+
+const AUTH0_NAMESPACE = 'https://auth.a24-press.com';
 
 function App() {
   const { 
@@ -32,7 +37,7 @@ function App() {
           setCustomUser(authResult.idTokenPayload);
           window.history.replaceState(null, "", window.location.pathname);
         } else if (err) {
-          console.error("Lỗi parse hash:", err);
+          console.error("Error parsing hash:", err);
         }
       });
     }
@@ -59,7 +64,7 @@ function App() {
   const handleCustomSignup = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
+      alert("Passwords do not match!");
       return;
     }
     setIsSubmitting(true);
@@ -75,10 +80,10 @@ function App() {
     }, function (err) {
       setIsSubmitting(false);
       if (err) {
-        alert("Lỗi đăng ký: " + err.description);
+        alert("Error: " + err.description);
         return;
       }
-      alert("Đăng ký thành công! Hãy kiểm tra email để xác nhận.");
+      alert("Registration successful! Please check your email to verify.");
       setView('custom-signin');
     });
   };
@@ -92,12 +97,12 @@ function App() {
       email: formData.email,
       password: formData.password,
       redirectUri: window.location.origin,
-      responseType: 'token id_token',
-      scope: 'openid profile email'
+      responseType: responseType,
+      scope: scope
     } as any, function (err: any) {
       setIsSubmitting(false);
       if (err) {
-        alert("Lỗi đăng nhập: " + err.description);
+        alert("Error: " + err.description);
         return;
       }
     });
@@ -106,7 +111,7 @@ function App() {
   const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email) {
-      alert("Vui lòng nhập email!");
+      alert("Please enter your email!");
       return;
     }
     setIsSubmitting(true);
@@ -116,10 +121,10 @@ function App() {
     }, function (err, resp) {
       setIsSubmitting(false);
       if (err) {
-        alert("Lỗi: " + err.description);
+        alert("Error: " + err.description);
         return;
       }
-      alert("Một email hướng dẫn reset mật khẩu đã được gửi đến: " + formData.email);
+      alert("A password reset email has been sent to: " + formData.email);
       setView('custom-signin');
     });
   };
@@ -138,12 +143,34 @@ function App() {
           <p className="user-email">{displayUser.email}</p>
         </div>
         
-        <div style={{ textAlign: 'left', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', fontSize: '0.875rem' }}>
-          <p style={{ color: '#94a3b8', marginBottom: '0.5rem' }}>Verified Account</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={16} color="#4ade80" />
-            <span>Successully Authenticated {customUser ? "(Custom Form)" : ""}</span>
+        <div style={{ textAlign: 'left', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', fontSize: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div>
+            <p style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Account Status</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={16} color="#4ade80" />
+              <span>Successfully Authenticated {customUser ? "(Custom Form)" : ""}</span>
+            </div>
           </div>
+
+          {(displayUser[`${AUTH0_NAMESPACE}/phone_number`] || displayUser['phone_number']) && (
+            <div>
+              <p style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Phone Number</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Phone size={16} color="var(--accent)" />
+                <span>{displayUser[`${AUTH0_NAMESPACE}/phone_number`] || displayUser['phone_number']}</span>
+              </div>
+            </div>
+          )}
+
+          {(displayUser[`${AUTH0_NAMESPACE}/date_of_birth`] || displayUser['date_of_birth']) && (
+            <div>
+              <p style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Date of Birth</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={16} color="var(--accent)" />
+                <span>{displayUser[`${AUTH0_NAMESPACE}/date_of_birth`] || displayUser['date_of_birth']}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <button 
@@ -259,7 +286,6 @@ function App() {
           <button type="submit" className="btn" disabled={isSubmitting}>
             {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Send Reset Link'}
           </button>
-					
         </form>
       </div>
     );
@@ -271,13 +297,10 @@ function App() {
       <p className="subtitle">Advanced Press API Access</p>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {/* Nút 1: Custom Sign In */}
         <button className="btn" onClick={() => setView('custom-signin')}>
           <LogIn size={20} />
           Custom Sign In
         </button>
-
-        {/* Nút 2: Sign In qua Auth0 Hosted App */}
         <button 
           className="btn btn-secondary" 
           onClick={() => loginWithRedirect()}
@@ -304,8 +327,7 @@ function App() {
         <button className="link-btn" onClick={() => loginWithRedirect({ authorizationParams: { action: 'forgot-password' } } as any)}>
           Forgot Password Via Auth0 App?
         </button>
-
-				<button className="link-btn" onClick={() => setView('custom-forgot-password')}>Forgot Password?</button>
+        <button className="link-btn" onClick={() => setView('custom-forgot-password')}>Forgot Password?</button>
       </div>
     </div>
   );
