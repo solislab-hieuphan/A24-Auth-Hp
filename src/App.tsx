@@ -16,6 +16,9 @@ const webAuth = new auth0.WebAuth({
   scope: scope
 });
 
+// Namespace cho custom claims - Bạn có thể dùng một chuỗi cố định này ở cả Local và Production
+const AUTH0_NAMESPACE = 'https://auth.a24-press.com';
+
 function App() {
   const { 
     loginWithRedirect, 
@@ -141,12 +144,34 @@ function App() {
           <p className="user-email">{displayUser.email}</p>
         </div>
         
-        <div style={{ textAlign: 'left', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', fontSize: '0.875rem' }}>
-          <p style={{ color: '#94a3b8', marginBottom: '0.5rem' }}>Verified Account</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShieldCheck size={16} color="#4ade80" />
-            <span>Successully Authenticated {customUser ? "(Custom Form)" : ""}</span>
+        <div style={{ textAlign: 'left', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', fontSize: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div>
+            <p style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Account Status</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={16} color="#4ade80" />
+              <span>Successfully Authenticated {customUser ? "(Custom Form)" : ""}</span>
+            </div>
           </div>
+
+          {(displayUser[`${AUTH0_NAMESPACE}/phone_number`] || displayUser['phone_number']) && (
+            <div>
+              <p style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Phone Number</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Phone size={16} color="var(--accent)" />
+                <span>{displayUser[`${AUTH0_NAMESPACE}/phone_number`] || displayUser['phone_number']}</span>
+              </div>
+            </div>
+          )}
+
+          {(displayUser[`${AUTH0_NAMESPACE}/date_of_birth`] || displayUser['date_of_birth']) && (
+            <div>
+              <p style={{ color: '#94a3b8', marginBottom: '0.25rem' }}>Date of Birth</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Calendar size={16} color="var(--accent)" />
+                <span>{displayUser[`${AUTH0_NAMESPACE}/date_of_birth`] || displayUser['date_of_birth']}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <button 
