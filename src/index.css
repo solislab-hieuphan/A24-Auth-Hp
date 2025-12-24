@@ -51,6 +51,10 @@ body::after {
 	z-index: -1;
 }
 
+span {
+	color: #000;
+}
+
 .container {
 	width: 100%;
 	max-width: 450px;
@@ -89,7 +93,7 @@ body::after {
 	font-weight: 700;
 	text-align: center;
 	margin-bottom: 0.5rem;
-	background: linear-gradient(to right, #6366f1, #94a3b8);
+	background: linear-gradient(to right, #fff, #94a3b8);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 }
@@ -221,7 +225,6 @@ input:focus {
 	font-size: 1.5rem;
 	font-weight: 600;
 	margin-bottom: 0.25rem;
-	color: var(--black);
 }
 
 .user-email {
