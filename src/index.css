@@ -51,6 +51,10 @@ body::after {
 	z-index: -1;
 }
 
+span {
+	color: #000;
+}
+
 .container {
 	width: 100%;
 	max-width: 450px;
