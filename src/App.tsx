@@ -16,7 +16,7 @@ const webAuth = new auth0.WebAuth({
   scope: scope
 });
 
-// Namespace cho custom claims - Bạn có thể dùng một chuỗi cố định này ở cả Local và Production
+// Namespace cho custom claims
 const AUTH0_NAMESPACE = 'https://auth.a24-press.com';
 
 function App() {
